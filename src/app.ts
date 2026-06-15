@@ -10,6 +10,8 @@ import globalErrorHandler from "./middleware/globalErrorHandler";
 import notFound from "./middleware/notFound";
 import { authRoute } from "./modules/auth/auth.route";
 
+import { issueRoute } from "./modules/issue/issue.route";
+
 const app: Application = express();
 
 app.disable("x-powered-by");
@@ -38,7 +40,9 @@ app.get(
   },
 );
 
+
 app.use("/api/auth", authRoute);
+app.use("/api/issues", issueRoute);
 
 app.use(notFound);
 app.use(globalErrorHandler);

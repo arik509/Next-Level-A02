@@ -30,7 +30,8 @@ const signupUser = catchAsync(
     return sendResponse(res, {
       statusCode: StatusCodes.CREATED,
       success: true,
-      message: "User registered successfully",
+      message:
+        "User registered successfully",
       data: result,
     });
   },
