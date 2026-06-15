@@ -193,7 +193,72 @@ const getAllIssuesFromDB = async (
   });
 };
 
+const getSingleIssueFromDB = async (
+  issueId: number,
+): Promise<TIssueWithReporter> => {
+  const issueResult =
+    await pool.query<TIssue>(
+      `
+        SELECT
+          id,
+          title,
+          description,
+          type,
+          status,
+          reporter_id,
+          created_at,
+          updated_at
+        FROM issues
+        WHERE id = $1
+      `,
+      [issueId],
+    );
+
+  const issue = issueResult.rows[0];
+
+  if (!issue) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      "Issue not found",
+    );
+  }
+
+  const reporterResult =
+    await pool.query<TIssueReporter>(
+      `
+        SELECT
+          id,
+          name,
+          role
+        FROM users
+        WHERE id = $1
+      `,
+      [issue.reporter_id],
+    );
+
+  const reporter = reporterResult.rows[0];
+
+  if (!reporter) {
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      "Reporter information not found",
+    );
+  }
+
+  return {
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
+    reporter,
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+  };
+};
+
 export const issueService = {
   createIssueIntoDB,
   getAllIssuesFromDB,
+  getSingleIssueFromDB,
 };

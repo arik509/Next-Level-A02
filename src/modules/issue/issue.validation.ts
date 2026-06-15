@@ -187,3 +187,28 @@ export const validateIssueQuery = (
 
   return validatedQuery;
 };
+
+export const validateIssueId = (
+  rawId: unknown,
+): number => {
+  if (
+    typeof rawId !== "string" ||
+    !/^[1-9]\d*$/.test(rawId)
+  ) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Issue ID must be a positive integer",
+    );
+  }
+
+  const issueId = Number(rawId);
+
+  if (!Number.isSafeInteger(issueId)) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Issue ID must be a valid integer",
+    );
+  }
+
+  return issueId;
+};

@@ -10,8 +10,10 @@ import sendResponse from "../../utils/sendResponse";
 import { issueService } from "./issue.service";
 import {
   validateCreateIssuePayload,
+  validateIssueId,
   validateIssueQuery,
 } from "./issue.validation";
+
 
 const createIssue = catchAsync(
   async (
@@ -70,7 +72,32 @@ const getAllIssues = catchAsync(
   },
 );
 
+const getSingleIssue = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+  ): Promise<Response> => {
+    const issueId = validateIssueId(
+      req.params.id,
+    );
+
+    const result =
+      await issueService.getSingleIssueFromDB(
+        issueId,
+      );
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message:
+        "Issue retrived successfully",
+      data: result,
+    });
+  },
+);
+
 export const issueController = {
   createIssue,
-   getAllIssues,
+  getAllIssues,
+  getSingleIssue,
 };
