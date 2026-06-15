@@ -12,6 +12,7 @@ import {
   validateCreateIssuePayload,
   validateIssueId,
   validateIssueQuery,
+  validateUpdateIssuePayload,
 } from "./issue.validation";
 
 
@@ -96,8 +97,47 @@ const getSingleIssue = catchAsync(
   },
 );
 
+const updateIssue = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+  ): Promise<Response> => {
+    if (!req.user) {
+      throw new AppError(
+        StatusCodes.UNAUTHORIZED,
+        "Authenticated user information is missing",
+      );
+    }
+
+    const issueId = validateIssueId(
+      req.params.id,
+    );
+
+    const updatePayload =
+      validateUpdateIssuePayload(
+        req.body as unknown,
+        req.user.role,
+      );
+
+    const result =
+      await issueService.updateIssueIntoDB(
+        issueId,
+        updatePayload,
+        req.user,
+      );
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Issue updated successfully",
+      data: result,
+    });
+  },
+);
+
 export const issueController = {
   createIssue,
   getAllIssues,
   getSingleIssue,
+  updateIssue,
 };

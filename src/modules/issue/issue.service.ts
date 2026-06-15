@@ -2,12 +2,14 @@ import { StatusCodes } from "http-status-codes";
 
 import { pool } from "../../db";
 import AppError from "../../utils/AppError";
+import type { TJwtPayload } from "../auth/auth.interface";
 import type {
   TCreateIssuePayload,
   TIssue,
   TIssueQuery,
   TIssueReporter,
   TIssueWithReporter,
+  TUpdateIssuePayload,
 } from "./issue.interface";
 
 const createIssueIntoDB = async (
@@ -257,8 +259,149 @@ const getSingleIssueFromDB = async (
   };
 };
 
+
+const updateIssueIntoDB = async (
+  issueId: number,
+  payload: TUpdateIssuePayload,
+  requester: TJwtPayload,
+): Promise<TIssue> => {
+  const existingIssueResult =
+    await pool.query<TIssue>(
+      `
+        SELECT
+          id,
+          title,
+          description,
+          type,
+          status,
+          reporter_id,
+          created_at,
+          updated_at
+        FROM issues
+        WHERE id = $1
+      `,
+      [issueId],
+    );
+
+  const existingIssue =
+    existingIssueResult.rows[0];
+
+  if (!existingIssue) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      "Issue not found",
+    );
+  }
+
+  const isMaintainer =
+    requester.role === "maintainer";
+
+  if (!isMaintainer) {
+    if (
+      existingIssue.reporter_id !==
+      requester.id
+    ) {
+      throw new AppError(
+        StatusCodes.FORBIDDEN,
+        "You can update only your own issues",
+      );
+    }
+
+    if (
+      existingIssue.status !== "open"
+    ) {
+      throw new AppError(
+        StatusCodes.CONFLICT,
+        "Only open issues can be updated by contributors",
+      );
+    }
+
+    if (payload.status !== undefined) {
+      throw new AppError(
+        StatusCodes.FORBIDDEN,
+        "Contributors cannot update issue status",
+      );
+    }
+  }
+
+  const setClauses: string[] = [];
+  const values: Array<string | number> = [];
+
+  if (payload.title !== undefined) {
+    values.push(payload.title);
+
+    setClauses.push(
+      `title = $${values.length}`,
+    );
+  }
+
+  if (payload.description !== undefined) {
+    values.push(payload.description);
+
+    setClauses.push(
+      `description = $${values.length}`,
+    );
+  }
+
+  if (payload.type !== undefined) {
+    values.push(payload.type);
+
+    setClauses.push(
+      `type = $${values.length}`,
+    );
+  }
+
+  if (payload.status !== undefined) {
+    values.push(payload.status);
+
+    setClauses.push(
+      `status = $${values.length}`,
+    );
+  }
+
+  if (setClauses.length === 0) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "At least one update field is required",
+    );
+  }
+
+  values.push(issueId);
+
+  const result = await pool.query<TIssue>(
+    `
+      UPDATE issues
+      SET ${setClauses.join(", ")}
+      WHERE id = $${values.length}
+      RETURNING
+        id,
+        title,
+        description,
+        type,
+        status,
+        reporter_id,
+        created_at,
+        updated_at
+    `,
+    values,
+  );
+
+  const updatedIssue = result.rows[0];
+
+  if (!updatedIssue) {
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      "Failed to update issue",
+    );
+  }
+
+  return updatedIssue;
+};
+
+
 export const issueService = {
   createIssueIntoDB,
   getAllIssuesFromDB,
   getSingleIssueFromDB,
+  updateIssueIntoDB,
 };

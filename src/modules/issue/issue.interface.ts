@@ -52,3 +52,10 @@ export interface TIssueWithReporter {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface TUpdateIssuePayload {
+  title?: string;
+  description?: string;
+  type?: TIssueType;
+  status?: TIssueStatus;
+}
