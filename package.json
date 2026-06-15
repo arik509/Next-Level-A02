@@ -1,25 +1,22 @@
 {
-  "name": "assignment-02",
+  "name": "Devpulse",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Internal Tech Issue and Feature Tracker API",
+  "main": "dist/server.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch ./src/server.ts",
+    "build": "tsc",
+    "start": "node ./dist/server.js",
+    "type-check": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "typescript": "^6.0.3"
-  },
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "http-status-codes": "^2.3.0",
-    "jsonwebtoken": "^9.0.3",
-    "pg": "^8.21.0"
-  }
+  "keywords": [
+    "express",
+    "postgresql",
+    "neondb",
+    "typescript",
+    "jwt"
+  ],
+  "author": "Sabir Hossain Arik",
+  "license": "ISC"
 }
