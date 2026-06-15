@@ -5,6 +5,11 @@ import { issueController } from "./issue.controller";
 
 const router = Router();
 
+router.get(
+  "/",
+  issueController.getAllIssues,
+);
+
 router.post(
   "/",
   auth("contributor", "maintainer"),

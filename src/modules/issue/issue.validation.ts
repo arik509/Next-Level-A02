@@ -3,12 +3,26 @@ import { StatusCodes } from "http-status-codes";
 import AppError from "../../utils/AppError";
 import type {
   TCreateIssuePayload,
+  TIssueQuery,
+  TIssueSort,
+  TIssueStatus,
   TIssueType,
 } from "./issue.interface";
 
 const validIssueTypes: TIssueType[] = [
   "bug",
   "feature_request",
+];
+
+const validIssueStatuses: TIssueStatus[] = [
+  "open",
+  "in_progress",
+  "resolved",
+];
+
+const validSortValues: TIssueSort[] = [
+  "newest",
+  "oldest",
 ];
 
 const isObject = (
@@ -86,4 +100,90 @@ export const validateCreateIssuePayload = (
       (rawDescription as string).trim(),
     type: rawType as TIssueType,
   };
+};
+
+export const validateIssueQuery = (
+  query: unknown,
+): TIssueQuery => {
+  if (!isObject(query)) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Invalid query parameters",
+    );
+  }
+
+  const rawSort = query.sort;
+  const rawType = query.type;
+  const rawStatus = query.status;
+
+  const validationErrors: string[] = [];
+
+  if (
+    rawSort !== undefined &&
+    (
+      typeof rawSort !== "string" ||
+      !validSortValues.includes(
+        rawSort as TIssueSort,
+      )
+    )
+  ) {
+    validationErrors.push(
+      "Sort must be newest or oldest",
+    );
+  }
+
+  if (
+    rawType !== undefined &&
+    (
+      typeof rawType !== "string" ||
+      !validIssueTypes.includes(
+        rawType as TIssueType,
+      )
+    )
+  ) {
+    validationErrors.push(
+      "Type must be bug or feature_request",
+    );
+  }
+
+  if (
+    rawStatus !== undefined &&
+    (
+      typeof rawStatus !== "string" ||
+      !validIssueStatuses.includes(
+        rawStatus as TIssueStatus,
+      )
+    )
+  ) {
+    validationErrors.push(
+      "Status must be open, in_progress, or resolved",
+    );
+  }
+
+  if (validationErrors.length > 0) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Invalid query parameters",
+      validationErrors,
+    );
+  }
+
+  const validatedQuery: TIssueQuery = {
+    sort:
+      rawSort === "oldest"
+        ? "oldest"
+        : "newest",
+  };
+
+  if (rawType !== undefined) {
+    validatedQuery.type =
+      rawType as TIssueType;
+  }
+
+  if (rawStatus !== undefined) {
+    validatedQuery.status =
+      rawStatus as TIssueStatus;
+  }
+
+  return validatedQuery;
 };
