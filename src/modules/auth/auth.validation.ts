@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 
 import AppError from "../../utils/AppError";
 import type {
+  TLoginPayload,
   TSignupPayload,
   TUserRole,
 } from "./auth.interface";
@@ -92,5 +93,53 @@ export const validateSignupPayload = (
       rawRole === "maintainer"
         ? "maintainer"
         : "contributor",
+  };
+};
+
+export const validateLoginPayload = (
+  payload: unknown,
+): TLoginPayload => {
+  if (!isObject(payload)) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Invalid request body",
+    );
+  }
+
+  const validationErrors: string[] = [];
+
+  const rawEmail = payload.email;
+  const rawPassword = payload.password;
+
+  if (
+    typeof rawEmail !== "string" ||
+    !emailPattern.test(rawEmail.trim())
+  ) {
+    validationErrors.push(
+      "A valid email address is required",
+    );
+  }
+
+  if (
+    typeof rawPassword !== "string" ||
+    rawPassword.length === 0
+  ) {
+    validationErrors.push("Password is required");
+  }
+
+  if (validationErrors.length > 0) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Validation failed",
+      validationErrors,
+    );
+  }
+
+  return {
+    email: (rawEmail as string)
+      .trim()
+      .toLowerCase(),
+
+    password: rawPassword as string,
   };
 };

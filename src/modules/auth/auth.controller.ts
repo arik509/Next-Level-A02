@@ -7,16 +7,20 @@ import type {
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { authService } from "./auth.service";
-import { validateSignupPayload } from "./auth.validation";
+import {
+  validateLoginPayload,
+  validateSignupPayload,
+} from "./auth.validation";
 
 const signupUser = catchAsync(
   async (
     req: Request,
     res: Response,
   ): Promise<Response> => {
-    const signupPayload = validateSignupPayload(
-      req.body as unknown,
-    );
+    const signupPayload =
+      validateSignupPayload(
+        req.body as unknown,
+      );
 
     const result =
       await authService.signupUserIntoDB(
@@ -32,6 +36,31 @@ const signupUser = catchAsync(
   },
 );
 
+const loginUser = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+  ): Promise<Response> => {
+    const loginPayload =
+      validateLoginPayload(
+        req.body as unknown,
+      );
+
+    const result =
+      await authService.loginUserFromDB(
+        loginPayload,
+      );
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Login successful",
+      data: result,
+    });
+  },
+);
+
 export const authController = {
   signupUser,
+  loginUser,
 };

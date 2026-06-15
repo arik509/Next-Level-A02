@@ -9,4 +9,9 @@ router.post(
   authController.signupUser,
 );
 
+router.post(
+  "/login",
+  authController.loginUser,
+);
+
 export const authRoute = router;

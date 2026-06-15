@@ -9,6 +9,11 @@ export interface TSignupPayload {
   role: TUserRole;
 }
 
+export interface TLoginPayload {
+  email: string;
+  password: string;
+}
+
 export interface TPublicUser {
   id: number;
   name: string;
@@ -20,4 +25,15 @@ export interface TPublicUser {
 
 export interface TDatabaseUser extends TPublicUser {
   password: string;
+}
+
+export interface TJwtPayload {
+  id: number;
+  name: string;
+  role: TUserRole;
+}
+
+export interface TLoginResult {
+  token: string;
+  user: TPublicUser;
 }

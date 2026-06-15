@@ -4,7 +4,11 @@ import { StatusCodes } from "http-status-codes";
 import config from "../../config";
 import { pool } from "../../db";
 import AppError from "../../utils/AppError";
+import generateToken from "../../utils/jwt";
 import type {
+  TDatabaseUser,
+  TLoginPayload,
+  TLoginResult,
   TPublicUser,
   TSignupPayload,
 } from "./auth.interface";
@@ -98,6 +102,69 @@ const signupUserIntoDB = async (
   }
 };
 
+const loginUserFromDB = async (
+  payload: TLoginPayload,
+): Promise<TLoginResult> => {
+  const result = await pool.query<TDatabaseUser>(
+    `
+      SELECT
+        id,
+        name,
+        email,
+        password,
+        role,
+        created_at,
+        updated_at
+      FROM users
+      WHERE email = $1
+    `,
+    [payload.email],
+  );
+
+  const user = result.rows[0];
+
+  if (!user) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "Invalid email or password",
+    );
+  }
+
+  const isPasswordMatched =
+    await bcrypt.compare(
+      payload.password,
+      user.password,
+    );
+
+  if (!isPasswordMatched) {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "Invalid email or password",
+    );
+  }
+
+  const token = generateToken({
+    id: user.id,
+    name: user.name,
+    role: user.role,
+  });
+
+  const publicUser: TPublicUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    created_at: user.created_at,
+    updated_at: user.updated_at,
+  };
+
+  return {
+    token,
+    user: publicUser,
+  };
+};
+
 export const authService = {
   signupUserIntoDB,
+  loginUserFromDB
 };
