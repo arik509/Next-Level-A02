@@ -5,11 +5,11 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch ./src/server.ts",
-    "type-check": "tsc --noEmit",
-    "build": "tsup",
-    "start": "node ./dist/server.js"
-  },
+  "dev": "tsx watch ./src/server.ts",
+  "type-check": "tsc --noEmit",
+  "build": "tsup",
+  "start": "tsx ./src/server.ts"
+},
   "keywords": [
     "express",
     "postgresql",

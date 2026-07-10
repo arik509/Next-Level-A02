@@ -3,7 +3,7 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   entry: {
     server: "src/server.ts",
-    "api/index": "api/index.ts",
+    "api/index": "src/vercel/handler.ts",
   },
   format: ["esm"],
   outDir: "dist",
