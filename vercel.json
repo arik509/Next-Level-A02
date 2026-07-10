@@ -1,6 +1,9 @@
 {
   "version": 2,
+  "functions": {
+    "dist/api/index.js": {}
+  },
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
+    { "source": "/(.*)", "destination": "/dist/api/index.js" }
   ]
 }
