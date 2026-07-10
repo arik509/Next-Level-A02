@@ -9,7 +9,6 @@ export default async function handler(req: any, res: any) {
       dbReady = initDB();
     }
     await dbReady;
-
     return (app as any)(req, res);
   } catch (error: unknown) {
     console.error("Failed to initialize database:", error);
