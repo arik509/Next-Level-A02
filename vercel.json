@@ -1,9 +1,7 @@
 {
   "version": 2,
   "functions": {
-    "dist/api/index.js": {
-      "maxDuration": 10
-    }
+    "dist/api/index.js": {}
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/dist/api/index.js" }
