@@ -1,24 +1,16 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/server.ts"],
-
+  entry: {
+    server: "src/server.ts",
+    "api/index": "api/index.ts",
+  },
   format: ["esm"],
-
-  platform: "node",
-  target: "esnext",
-
   outDir: "dist",
-
+  target: "node18",
   clean: true,
-  bundle: true,
   splitting: false,
   sourcemap: true,
-
-  banner: {
-    js: `
-      import { createRequire } from "node:module";
-      const require = createRequire(import.meta.url);
-    `,
-  },
+  dts: false,
+  bundle: true,
 });
