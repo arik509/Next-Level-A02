@@ -1,16 +1,24 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: {
-    server: "src/server.ts",
-    "api/index": "src/vercel/handler.ts",
-  },
+  entry: ["src/server.ts"],
+
   format: ["esm"],
+
+  platform: "node",
+  target: "esnext",
+
   outDir: "dist",
-  target: "node18",
+
   clean: true,
+  bundle: true,
   splitting: false,
   sourcemap: true,
-  dts: false,
-  bundle: true,
+
+  banner: {
+    js: `
+      import { createRequire } from "node:module";
+      const require = createRequire(import.meta.url);
+    `,
+  },
 });

@@ -1,20 +1,36 @@
 import app from "./app";
-import config from "./config";
-import { initDB, pool } from "./db";
+import { initDB } from "./db";
 
-const main = async (): Promise<void> => {
+// Initialize database once on cold start
+let dbInitialized = false;
+
+const initializeDB = async (): Promise<void> => {
+  if (dbInitialized) return;
   try {
     await initDB();
-
-    app.listen(config.port, () => {
-      console.log(`DevPulse server is running on port ${config.port}`);
-    });
+    dbInitialized = true;
   } catch (error: unknown) {
-    console.error("Failed to start the application:", error);
-
-    await pool.end();
-    process.exit(1);
+    console.error("Failed to initialize database:", error);
+    throw error;
   }
 };
 
-void main();
+// For local development
+if (process.env.NODE_ENV !== "production") {
+  const startLocalServer = async (): Promise<void> => {
+    try {
+      await initializeDB();
+      const config = (await import("./config")).default;
+      app.listen(config.port, () => {
+        console.log(`DevPulse server is running on port ${config.port}`);
+      });
+    } catch (error: unknown) {
+      console.error("Failed to start the application:", error);
+      process.exit(1);
+    }
+  };
+  void startLocalServer();
+}
+
+// Export for Vercel serverless
+export default app;

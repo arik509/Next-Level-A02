@@ -1,11 +1,21 @@
 {
   "version": 2,
-  "functions": {
-    "dist/api/index.js": {
-      "maxDuration": 10
+  "builds": [
+    {
+      "src": "dist/server.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": "dist/**"
+      }
     }
-  },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/dist/api/index.js" }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "dist/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
